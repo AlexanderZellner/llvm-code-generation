@@ -1,4 +1,4 @@
-# Expressions
+# Expressions - due in only one week on 2020-7-14
 
 Implement an expression interpreter and an expression compiler for your database.
 Your implementation should support the following type of expressions:
