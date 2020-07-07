@@ -32,7 +32,7 @@ which evaluates the expression tree given an argument array.
 ## Compiler
 For the expression compiler, each expression type should implement the method 
 ```c++
-virtual llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args)
+virtual llvm::Value* build(llvm::IRBuilder& builder, llvm::Value* args)
 ```
 which generates code for the expression using the LLVM framework.
 The expression compiler should then implement the method `void compile(Expression& expression)` that compiles a function `data64_t (*fnPtr)(data64_t* args)` for the expression tree.
@@ -48,7 +48,7 @@ Your implementation should pass all tests in `test/expression_test.cc`.
 Run the benchmark `bench/bm_expression.cc` to compare the efficiency of both approaches.
 
 ## Setup
-This task requires LLVM 7 which must be installed separately.
+This task requires LLVM 10 which must be installed separately.
 
 MacOS:
 ```
@@ -57,8 +57,6 @@ brew install llvm@10
 
 # Configure the project
 cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=1 $PROJECT_DIRECTORY
-
-# ...or set LLVM_DIR manually in CLion
 ```
 
 Ubuntu:
