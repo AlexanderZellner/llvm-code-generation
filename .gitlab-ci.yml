@@ -25,7 +25,7 @@ make:
             - build/vendor/
         policy: pull-push
     tags:
-        - "clang-7"
+        - "clang-10"
         - "cmake"
         - "python3"
 
@@ -61,8 +61,8 @@ lint:
             - build/vendor/
         policy: pull-push
     tags:
-        - "clang-7"
-        - "clang-tidy-7"
+        - "clang-10"
+        - "clang-tidy-10"
         - "cmake"
         - "python3"
     allow_failure: true
