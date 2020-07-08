@@ -51,7 +51,7 @@ llvm::Error JIT::addModule(std::unique_ptr<llvm::Module> module) {
     return optimize_layer.add(mainDylib, llvm::orc::ThreadSafeModule{move(module), context});
 }
 
-void* JIT::getPointerToFunction(const std::string& name) {
+ void* JIT::getPointerToFunction(const std::string& name) {
     auto sym = execution_session.lookup(&mainDylib, name);
     return sym ? reinterpret_cast<void*>(static_cast<uintptr_t>(sym->getAddress())) : nullptr;
 }

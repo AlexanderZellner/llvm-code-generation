@@ -51,7 +51,7 @@ namespace moderndbs {
         using ModuleHandle = llvm::orc::VModuleKey;
 
         /// The constructor.
-        JIT(llvm::orc::ThreadSafeContext& ctx);
+        explicit JIT(llvm::orc::ThreadSafeContext& ctx);
 
         /// Get the target machine.
         auto& getTargetMachine() { return *target_machine; }
