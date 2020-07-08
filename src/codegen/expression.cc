@@ -23,6 +23,7 @@ ExpressionCompiler::ExpressionCompiler(llvm::orc::ThreadSafeContext& context)
 
 /// Compile an expression.
 void ExpressionCompiler::compile(Expression& expression, bool verbose) {
+   std::ignore = verbose;
    llvm::IRBuilder<> builder(*this->context.getContext());
    auto function_type = llvm::FunctionType::get(builder.getInt64Ty(), {llvm::PointerType::get(llvm::Type::getInt64Ty(*this->context.getContext()), 0)}, false);
    auto function = llvm::cast<llvm::Function>(this->module->getOrInsertFunction("function", function_type).getCallee());
