@@ -41,7 +41,7 @@ namespace moderndbs {
         data64_t value;
 
         /// Constructor.
-        // NOLINT
+// NOLINTNEXTLINE
         explicit Constant(long long value)
             : Expression(ValueType::INT64), value(*reinterpret_cast<data64_t*>(&value)) {}
         /// Constructor.
@@ -50,23 +50,19 @@ namespace moderndbs {
 
         data64_t evaluate(const data64_t* args) override {
            // have to use parameter to silent linter
-           {
-              args = args;
-           }
+           std::ignore = args;
            return this->value;
         }
 
         // Can either be int or double
         llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) override {
               // have to use parameter to silent linter
-           {
-              args = args;
-           }
-           if (this->getType() == ValueType::DOUBLE) {
-              return llvm::ConstantFP::get(builder.getDoubleTy(), *reinterpret_cast<double *>(&this->value));
-           } else {
-              return llvm::ConstantInt::get(builder.getInt64Ty(), this->value, true);
-           }
+         std::ignore = args;
+         if (this->getType() == ValueType::DOUBLE) {
+           return llvm::ConstantFP::get(builder.getDoubleTy(), *reinterpret_cast<double *>(&this->value));
+         } else {
+           return llvm::ConstantInt::get(builder.getInt64Ty(), this->value, true);
+         }
         }
     };
 
