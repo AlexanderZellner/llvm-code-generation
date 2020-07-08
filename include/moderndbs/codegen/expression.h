@@ -47,7 +47,18 @@ namespace moderndbs {
         Constant(double value)
             : Expression(ValueType::DOUBLE), value(*reinterpret_cast<data64_t*>(&value)) {}
 
-        /// TODO(students) implement evaluate and build
+        data64_t evaluate(const data64_t* args) override {
+           return this->value;
+        }
+
+        // Can either be int or double
+        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) override {
+           if (this->getType() == ValueType::DOUBLE) {
+              return llvm::ConstantFP::get(builder.getDoubleTy(), *reinterpret_cast<double *>(&this->value));
+           } else {
+              return llvm::ConstantInt::get(builder.getInt64Ty(), this->value, true);
+           }
+        }
     };
 
     struct Argument: public Expression {
@@ -59,6 +70,22 @@ namespace moderndbs {
             : Expression(type), index(index) {}
 
         /// TODO(students) implement evaluate and build
+        data64_t evaluate(const data64_t* args) override {
+           return args[this->index];
+        }
+
+       llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) override {
+          llvm::Value* argument;
+
+          switch (this->getType()) {
+             case Expression::ValueType::DOUBLE:
+                argument = builder.CreateGEP(builder.getDoubleTy(), args, llvm::ConstantFP::get(builder.getDoubleTy(), this->index));
+                return builder.CreateLoad(builder.getDoubleTy(), argument);
+             case Expression::ValueType::INT64:
+                argument = builder.CreateGEP(builder.getInt64Ty(), args, llvm::ConstantInt::get(builder.getInt64Ty(), this->index));
+                return builder.CreateLoad(builder.getInt64Ty(), argument);
+          }
+       }
     };
 
     struct Cast: public Expression {
@@ -74,6 +101,13 @@ namespace moderndbs {
         }
 
         /// TODO(students) implement evaluate and build
+        data64_t evaluate(const data64_t* args) override {
+
+        }
+
+        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) {
+
+        }
     };
 
     struct BinaryExpression: public Expression {
@@ -95,7 +129,33 @@ namespace moderndbs {
         AddExpression(Expression& left, Expression& right)
             : BinaryExpression(left, right) {}
 
-        /// TODO(students) implement evaluate and build
+        data64_t evaluate(const data64_t* args) override {
+           auto leftE = this->left.evaluate(args);
+           auto rightE = this->right.evaluate(args);
+           switch (this->getType()) {
+              case Expression::ValueType::INT64:
+                 return leftE + rightE;
+              case Expression::ValueType::DOUBLE:
+                 double result = *reinterpret_cast<double*>(&leftE) + *reinterpret_cast<double*>(&rightE);
+                 return *reinterpret_cast<data64_t*>(&result);
+           }
+        }
+
+        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) {
+           llvm::Value* valueLeft = this->left.build(builder, args);
+           llvm::Value* valueRight = this->right.build(builder, args);
+           llvm::Value* addition;
+           switch (this->getType()) {
+              case Expression::ValueType::INT64:
+                 addition = builder.CreateAdd(valueLeft, valueRight);
+                 break;
+              case Expression::ValueType::DOUBLE:
+                 // here
+                 addition = builder.CreateFAdd(valueLeft, valueRight);
+                 break;
+           }
+           return addition;
+        }
     };
 
     struct SubExpression: public BinaryExpression {
@@ -104,6 +164,32 @@ namespace moderndbs {
             : BinaryExpression(left, right) {}
 
         /// TODO(students) implement evaluate and build
+        data64_t evaluate(const data64_t* args) override {
+           auto leftE = this->left.evaluate(args);
+           auto rightE = this->right.evaluate(args);
+           switch (this->getType()) {
+              case Expression::ValueType::INT64:
+                 return leftE - rightE;
+              case Expression::ValueType::DOUBLE:
+                 double result = *reinterpret_cast<double*>(&leftE) - *reinterpret_cast<double*>(&rightE);
+                 return *reinterpret_cast<data64_t*>(&result);
+           }
+        }
+
+        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) {
+           llvm::Value* valueLeft = this->left.build(builder, args);
+           llvm::Value* valueRight = this->right.build(builder, args);
+           llvm::Value* subE;
+           switch (this->getType()) {
+              case Expression::ValueType::INT64:
+                 subE = builder.CreateSub(valueLeft, valueRight);
+                 break;
+              case Expression::ValueType::DOUBLE:
+                 subE = builder.CreateFSub(valueLeft, valueRight);
+                 break;
+           }
+           return subE;
+        }
     };
 
     struct MulExpression: public BinaryExpression {
@@ -112,6 +198,33 @@ namespace moderndbs {
             : BinaryExpression(left, right) {}
 
         /// TODO(students) implement evaluate and build
+        data64_t evaluate(const data64_t* args) override {
+           auto leftE = this->left.evaluate(args);
+           auto rightE = this->right.evaluate(args);
+           switch (this->getType()) {
+              case Expression::ValueType::INT64:
+                 return leftE * rightE;
+              case Expression::ValueType::DOUBLE:
+                 // one is a multiplication one is a pointer :)
+                 double result = *reinterpret_cast<double*>(&leftE) * *reinterpret_cast<double*>(&rightE);
+                 return *reinterpret_cast<data64_t*>(&result);
+           }
+        }
+
+        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) {
+           llvm::Value* valueLeft = this->left.build(builder, args);
+           llvm::Value* valueRight = this->right.build(builder, args);
+           llvm::Value* multiplication;
+           switch (this->getType()) {
+              case Expression::ValueType::INT64:
+                 multiplication = builder.CreateMul(valueLeft, valueRight);
+                 break;
+              case Expression::ValueType::DOUBLE:
+                 multiplication = builder.CreateFMul(valueLeft, valueRight);
+                 break;
+           }
+           return multiplication;
+        }
     };
 
     struct DivExpression: public BinaryExpression {
@@ -120,6 +233,32 @@ namespace moderndbs {
             : BinaryExpression(left, right) {}
 
         /// TODO(students) implement evaluate and build
+        data64_t evaluate(const data64_t* args) override {
+           auto leftE = this->left.evaluate(args);
+           auto rightE = this->right.evaluate(args);
+           switch (this->getType()) {
+              case Expression::ValueType::INT64:
+                 return leftE / rightE;
+              case Expression::ValueType::DOUBLE:
+                 double result = *reinterpret_cast<double*>(&leftE) / *reinterpret_cast<double*>(&rightE);
+                 return *reinterpret_cast<data64_t*>(&result);
+           }
+        }
+
+       llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) {
+          llvm::Value* valueLeft = this->left.build(builder, args);
+          llvm::Value* valueRight = this->right.build(builder, args);
+          llvm::Value* division;
+          switch (this->getType()) {
+             case Expression::ValueType::INT64:
+                division = builder.CreateSDiv(valueLeft, valueRight);
+                break;
+             case Expression::ValueType::DOUBLE:
+                division = builder.CreateFDiv(valueLeft, valueRight);
+                break;
+          }
+          return division;
+       }
     };
 
     struct ExpressionCompiler {
