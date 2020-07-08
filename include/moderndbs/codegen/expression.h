@@ -41,7 +41,7 @@ namespace moderndbs {
         data64_t value;
 
         /// Constructor.
-        //NOLINT
+        // NOLINT
         Constant(long long value)
             : Expression(ValueType::INT64), value(*reinterpret_cast<data64_t*>(&value)) {}
         /// Constructor.
@@ -49,19 +49,15 @@ namespace moderndbs {
             : Expression(ValueType::DOUBLE), value(*reinterpret_cast<data64_t*>(&value)) {}
 
         data64_t evaluate(const data64_t* args) override {
-           {
-              // have to use parameter to silent linter
-              args;
-           }
+           // have to use parameter to silent linter
+           args;
            return this->value;
         }
 
         // Can either be int or double
         llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) override {
-           {
               // have to use parameter to silent linter
               args;
-           }
            if (this->getType() == ValueType::DOUBLE) {
               return llvm::ConstantFP::get(builder.getDoubleTy(), *reinterpret_cast<double *>(&this->value));
            } else {
@@ -115,7 +111,7 @@ namespace moderndbs {
            return *args;
         }
 
-        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) {
+        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) override {
            switch (type) {
               case Expression::ValueType::INT64:
                  return builder.CreateFPToSI(child.build(builder, args), builder.getInt64Ty());
@@ -159,7 +155,7 @@ namespace moderndbs {
            }
         }
 
-        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) {
+        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) override {
            llvm::Value* valueLeft = this->left.build(builder, args);
            llvm::Value* valueRight = this->right.build(builder, args);
            llvm::Value* addition;
@@ -198,7 +194,7 @@ namespace moderndbs {
            }
         }
 
-        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) {
+        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) override {
            llvm::Value* valueLeft = this->left.build(builder, args);
            llvm::Value* valueRight = this->right.build(builder, args);
            llvm::Value* subE;
@@ -236,7 +232,7 @@ namespace moderndbs {
            }
         }
 
-        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) {
+        llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) override {
            llvm::Value* valueLeft = this->left.build(builder, args);
            llvm::Value* valueRight = this->right.build(builder, args);
            llvm::Value* multiplication;
@@ -273,7 +269,7 @@ namespace moderndbs {
            }
         }
 
-       llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) {
+       llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) override {
           llvm::Value* valueLeft = this->left.build(builder, args);
           llvm::Value* valueRight = this->right.build(builder, args);
           llvm::Value* division;
