@@ -448,7 +448,7 @@ TEST(ExpressionTest, InterpretedComplexFPExpression) {
 }
 
 // NOLINTNEXTLINE
-TEST(ExpressionTest, ComiledCastingExpression) {
+TEST(ExpressionTest, CompiledCastingExpression) {
     llvm::orc::ThreadSafeContext context{std::make_unique<llvm::LLVMContext>()};
 
     // (((42 + a1) - (21 - a0)) + a2) + 100
@@ -493,6 +493,33 @@ TEST(ExpressionTest, ComiledCastingExpression) {
 
         ASSERT_EQ(*reinterpret_cast<int64_t*>(&result), expected);
     }
+}
+
+// ----------------------------------
+// CASTS
+// ----------------------------------
+
+
+// NOLINTNEXTLINE
+TEST(ExpressionTest, CompiledIntegerConstToFPConst) {
+   llvm::orc::ThreadSafeContext context{std::make_unique<llvm::LLVMContext>()};
+   Constant constant(42ll);
+   Cast fp_const(constant, moderndbs::Expression::ValueType::DOUBLE);
+   ExpressionCompiler compiler(context);
+   compiler.compile(fp_const);
+   auto result = compiler.run(nullptr);
+   EXPECT_EQ(*reinterpret_cast<double*>(&result), 42.0);
+}
+
+// NOLINTNEXTLINE
+TEST(ExpressionTest, CompiledFPConstToIntConst) {
+   llvm::orc::ThreadSafeContext context{std::make_unique<llvm::LLVMContext>()};
+   Constant constant(42.0);
+   Cast fp_const(constant, moderndbs::Expression::ValueType::INT64);
+   ExpressionCompiler compiler(context);
+   compiler.compile(fp_const);
+   auto result = compiler.run(nullptr);
+   EXPECT_EQ(*reinterpret_cast<int64_t *>(&result), 42);
 }
 
 }  // namespace

@@ -41,6 +41,7 @@ namespace moderndbs {
         data64_t value;
 
         /// Constructor.
+        //NOLINT
         Constant(long long value)
             : Expression(ValueType::INT64), value(*reinterpret_cast<data64_t*>(&value)) {}
         /// Constructor.
@@ -48,11 +49,19 @@ namespace moderndbs {
             : Expression(ValueType::DOUBLE), value(*reinterpret_cast<data64_t*>(&value)) {}
 
         data64_t evaluate(const data64_t* args) override {
+           {
+              // have to use parameter to silent linter
+              args;
+           }
            return this->value;
         }
 
         // Can either be int or double
         llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) override {
+           {
+              // have to use parameter to silent linter
+              args;
+           }
            if (this->getType() == ValueType::DOUBLE) {
               return llvm::ConstantFP::get(builder.getDoubleTy(), *reinterpret_cast<double *>(&this->value));
            } else {
@@ -102,11 +111,17 @@ namespace moderndbs {
 
         /// TODO(students) implement evaluate and build
         data64_t evaluate(const data64_t* args) override {
-
+           // orginally I had a reinterpret cast aber will be data again so
+           return *args;
         }
 
         llvm::Value* build(llvm::IRBuilder<>& builder, llvm::Value* args) {
-
+           switch (type) {
+              case Expression::ValueType::INT64:
+                 return builder.CreateFPToSI(child.build(builder, args), builder.getInt64Ty());
+              case Expression::ValueType::DOUBLE:
+                 return builder.CreateSIToFP(child.build(builder, args), builder.getDoubleTy());
+           }
         }
     };
 
@@ -133,11 +148,14 @@ namespace moderndbs {
            auto leftE = this->left.evaluate(args);
            auto rightE = this->right.evaluate(args);
            switch (this->getType()) {
-              case Expression::ValueType::INT64:
-                 return leftE + rightE;
-              case Expression::ValueType::DOUBLE:
+              case Expression::ValueType::INT64: {
+                 auto res = *reinterpret_cast<int64_t*>(&leftE) + *reinterpret_cast<int64_t*>(&rightE);
+                 return *reinterpret_cast<data64_t*>(&res);
+              }
+              case Expression::ValueType::DOUBLE: {
                  double result = *reinterpret_cast<double*>(&leftE) + *reinterpret_cast<double*>(&rightE);
                  return *reinterpret_cast<data64_t*>(&result);
+              }
            }
         }
 
@@ -146,13 +164,15 @@ namespace moderndbs {
            llvm::Value* valueRight = this->right.build(builder, args);
            llvm::Value* addition;
            switch (this->getType()) {
-              case Expression::ValueType::INT64:
+              case Expression::ValueType::INT64: {
                  addition = builder.CreateAdd(valueLeft, valueRight);
                  break;
-              case Expression::ValueType::DOUBLE:
+              }
+              case Expression::ValueType::DOUBLE: {
                  // here
                  addition = builder.CreateFAdd(valueLeft, valueRight);
                  break;
+              }
            }
            return addition;
         }
@@ -168,8 +188,10 @@ namespace moderndbs {
            auto leftE = this->left.evaluate(args);
            auto rightE = this->right.evaluate(args);
            switch (this->getType()) {
-              case Expression::ValueType::INT64:
-                 return leftE - rightE;
+              case Expression::ValueType::INT64: {
+                 auto res = *reinterpret_cast<int64_t*>(&leftE) - *reinterpret_cast<int64_t*>(&rightE);
+                 return *reinterpret_cast<data64_t*>(&res);
+              }
               case Expression::ValueType::DOUBLE:
                  double result = *reinterpret_cast<double*>(&leftE) - *reinterpret_cast<double*>(&rightE);
                  return *reinterpret_cast<data64_t*>(&result);
@@ -202,12 +224,15 @@ namespace moderndbs {
            auto leftE = this->left.evaluate(args);
            auto rightE = this->right.evaluate(args);
            switch (this->getType()) {
-              case Expression::ValueType::INT64:
-                 return leftE * rightE;
-              case Expression::ValueType::DOUBLE:
+              case Expression::ValueType::INT64: {
+                 auto res = *reinterpret_cast<int64_t*>(&leftE) * *reinterpret_cast<int64_t*>(&rightE);
+                 return *reinterpret_cast<data64_t*>(&res);
+              }
+              case Expression::ValueType::DOUBLE: {
                  // one is a multiplication one is a pointer :)
                  double result = *reinterpret_cast<double*>(&leftE) * *reinterpret_cast<double*>(&rightE);
                  return *reinterpret_cast<data64_t*>(&result);
+              }
            }
         }
 
@@ -237,11 +262,14 @@ namespace moderndbs {
            auto leftE = this->left.evaluate(args);
            auto rightE = this->right.evaluate(args);
            switch (this->getType()) {
-              case Expression::ValueType::INT64:
-                 return leftE / rightE;
-              case Expression::ValueType::DOUBLE:
+              case Expression::ValueType::INT64: {
+                 auto res = *reinterpret_cast<int64_t*>(&leftE) / *reinterpret_cast<int64_t*>(&rightE);
+                 return *reinterpret_cast<data64_t*>(&res);
+              }
+              case Expression::ValueType::DOUBLE: {
                  double result = *reinterpret_cast<double*>(&leftE) / *reinterpret_cast<double*>(&rightE);
                  return *reinterpret_cast<data64_t*>(&result);
+              }
            }
         }
 
@@ -250,12 +278,14 @@ namespace moderndbs {
           llvm::Value* valueRight = this->right.build(builder, args);
           llvm::Value* division;
           switch (this->getType()) {
-             case Expression::ValueType::INT64:
+             case Expression::ValueType::INT64: {
                 division = builder.CreateSDiv(valueLeft, valueRight);
                 break;
-             case Expression::ValueType::DOUBLE:
+             }
+             case Expression::ValueType::DOUBLE: {
                 division = builder.CreateFDiv(valueLeft, valueRight);
                 break;
+             }
           }
           return division;
        }

@@ -35,7 +35,7 @@ JIT::JIT(llvm::orc::ThreadSafeContext& ctx)
       data_layout(target_machine->createDataLayout()),
       execution_session(),
       context(ctx),
-      object_layer(execution_session, []() { return std::make_unique<llvm::SectionMemoryManager>(); }),
+      object_layer(execution_session, []() { return std::make_unique<llvm::SectionMemoryManager>(); }), //NOLINT
       compile_layer(execution_session, object_layer, std::make_unique<llvm::orc::SimpleCompiler>(*target_machine)),
       optimize_layer(execution_session, compile_layer, [] (llvm::orc::ThreadSafeModule m, const llvm::orc::MaterializationResponsibility&) { optimizeModule(*m.getModuleUnlocked()); return m; }),
       mainDylib(execution_session.createJITDylib("<main>")) {
