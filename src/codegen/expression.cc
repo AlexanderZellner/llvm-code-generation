@@ -27,7 +27,9 @@ void ExpressionCompiler::compile(Expression& expression, bool verbose) {
    auto printfT = llvm::FunctionType::get(llvm::Type::getInt32Ty(*this->context.getContext()), {llvm::Type::getInt8Ty(*this->context.getContext())}, true);
    auto printfFn = llvm::cast<llvm::Function>(this->module->getOrInsertFunction("printf", printfT).getCallee());
 
-   auto function_type = llvm::FunctionType::get(llvm::Type::getInt64Ty(*this->context.getContext()), {llvm::PointerType::get(llvm::Type::getInt64Ty(*this->context.getContext()),0)}, false);
+   auto function_type = llvm::FunctionType::get(builder.getInt64Ty(), {llvm::PointerType::get(llvm::Type::getInt64Ty(*this->context.getContext()), 0)}, false);
+
+   //auto function_type = llvm::FunctionType::get(llvm::Type::getInt64Ty(*this->context.getContext()), {llvm::PointerType::get(llvm::Type::getInt64Ty(*this->context.getContext()),0)}, false);
    auto function = llvm::cast<llvm::Function>(this->module->getOrInsertFunction("function", function_type).getCallee());
 
    llvm::BasicBlock *basicBlock = llvm::BasicBlock::Create(*this->context.getContext(), "entry", function);

@@ -79,10 +79,10 @@ namespace moderndbs {
 
           switch (this->getType()) {
              case Expression::ValueType::DOUBLE:
-                argument = builder.CreateGEP(builder.getDoubleTy(), args, llvm::ConstantFP::get(builder.getDoubleTy(), this->index));
+                argument = builder.CreateGEP(args, builder.getInt64(index));
                 return builder.CreateLoad(builder.getDoubleTy(), argument);
              case Expression::ValueType::INT64:
-                argument = builder.CreateGEP(builder.getInt64Ty(), args, llvm::ConstantInt::get(builder.getInt64Ty(), this->index));
+                argument = builder.CreateGEP(args, builder.getInt64(index));
                 return builder.CreateLoad(builder.getInt64Ty(), argument);
           }
        }
